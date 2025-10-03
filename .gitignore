@@ -22,3 +22,41 @@
 # virtual machine crash logs, see http://www.java.com/en/download/help/error_hotspot.xml
 hs_err_pid*
 replay_pid*
+
+# Archivos compilados de Java
+*.class
+
+# Archivos empaquetados
+*.jar
+*.war
+*.ear
+
+# Archivos de log
+*.log
+
+# Archivos temporales
+*.tmp
+*.bak
+*~
+
+# Configuración de IDEs
+# VS Code
+.vscode/
+
+# IntelliJ IDEA
+.idea/
+*.iml
+out/
+
+# Eclipse
+.project
+.classpath
+.settings/
+bin/
+
+# NetBeans
+nbproject/private/
+build/
+nbbuild/
+dist/
+nbdist/
