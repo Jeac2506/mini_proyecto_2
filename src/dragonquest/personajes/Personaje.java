@@ -37,8 +37,9 @@ public abstract class Personaje {
     }
 
     public void curar(int cantidad) {
-        hpActual = Math.min(hpMax, hpActual + cantidad);
-        System.out.println(nombre + " recupera " + cantidad + " HP. (HP: " + hpActual + ")");
+        hpActual += cantidad;
+        if (hpActual > hpMax) hpActual = hpMax;
+        System.out.println(nombre + " se cura " + cantidad + " puntos. HP: " + hpActual + "/" + hpMax);
     }
 
     // Aplica un estado con duración
@@ -108,6 +109,10 @@ public abstract class Personaje {
 
     public boolean puedeActuar() {
         return estado == EstadoAlterado.NORMAL;
+    }
+
+    public void recuperarMP(int cantidad) {
+        mpActual = Math.min(mpMax, mpActual + cantidad);
     }
 
     public abstract void tomarTurno(List<Personaje> aliados, List<Personaje> enemigos, Scanner sc);
