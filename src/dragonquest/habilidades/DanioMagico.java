@@ -2,6 +2,12 @@ package dragonquest.habilidades;
 
 import dragonquest.personajes.Personaje;
 
+/**
+ * DanioMagico - habilidad que inflige daño fijo (ignora o usa ataque mágico).
+ *
+ * Ejemplo simple: resta puntos de vida al objetivo en base a 'poder'.
+ * Nota: aquí no se resta la defensa del objetivo a menos que se haga en recibirDaño.
+ */
 public class DanioMagico extends Habilidad {
     private int poder;
 
