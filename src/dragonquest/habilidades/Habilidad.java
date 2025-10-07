@@ -1,7 +1,5 @@
 package dragonquest.habilidades;
 
-import java.util.List;
-import java.util.Scanner;
 import dragonquest.personajes.Personaje;
 
 public abstract class Habilidad {
@@ -13,14 +11,7 @@ public abstract class Habilidad {
         this.costoMP = costoMP;
     }
 
-    public String getNombre() {
-        return nombre;
-    }
+    public abstract void ejecutar(Personaje usuario, Personaje objetivo);
 
-    public int getCostoMP() {
-        return costoMP;
-    }
-
-    // Método para ejecutar la habilidad
-    public abstract void ejecutar(Personaje usuario, List<Personaje> enemigos, List<Personaje> aliados, Scanner sc);
+    public String getNombre() { return nombre; }
 }
