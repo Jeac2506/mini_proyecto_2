@@ -16,7 +16,7 @@
 Cada personaje cuenta con atributos como **HP**, **MP**, **ataque**, **defensa** y **velocidad**.  
 Durante el combate, los héroes pueden **atacar, defenderse, usar habilidades o ítems**, mientras que los enemigos actúan mediante una **IA básica**.  
 
-El juego se ejecuta en consola y busca aplicar los conceptos fundamentales de la **Programación Orientada a Objetos (POO)**, incluyendo:
+El juego se ejecuta en consola y busca aplicar los conceptos fundamentales de la **Programación Orientada a Eventos (POE)**, incluyendo:
 - Herencia  
 - Polimorfismo  
 - Clases abstractas e interfaces  
@@ -52,11 +52,10 @@ dragonquest/
     ├── Personaje.java             → Clase base abstracta con atributos y métodos comunes
     ├── Heroe.java                 → Subclase que representa a los héroes
     └── Enemigo.java               → Subclase que representa a los enemigos
-
+```
 ---
 
 ## Instrucciones para Colaboradores
-
 **Si otro desarrollador desea contribuir:**
 
 **Clonar el repositorio:**
