@@ -26,6 +26,8 @@ El juego se ejecuta en consola y busca aplicar los conceptos fundamentales de la
 ---
 
 ## Estructura del Proyecto
+
+```plaintext
 dragonquest/
 │
 ├── DragonQuestVIII.java           → Clase principal (main)
@@ -51,40 +53,39 @@ dragonquest/
     ├── Heroe.java                 → Subclase que representa a los héroes
     └── Enemigo.java               → Subclase que representa a los enemigos
 
+---
 
 ## Instrucciones para Colaboradores
 
 **Si otro desarrollador desea contribuir:**
 
-- Clonar el repositorio:
+**Clonar el repositorio:**
 
-git clone https://github.com/Juliank100/Mini_Proyecto_1.git
-cd Mini_Proyecto_1
-
-
-- Crear una nueva rama:
-
-git checkout -b nombre-rama
+- git clone https://github.com/Juliank100/Mini_Proyecto_1.git cd Mini_Proyecto_1
 
 
-- Realizar los cambios y hacer commit:
+**Crear una nueva rama:**
 
-git add .
-git commit -m "Descripción del cambio"
+- git checkout -b nombre-rama
 
 
-- Subir los cambios y crear un Pull Request:
+**Realizar los cambios y hacer commit:**
 
-git push origin nombre-rama
+- git add .
+- git commit -m "Descripción del cambio"
 
+
+**Subir los cambios y crear un Pull Request:**
+
+- git push origin nombre-rama
 
 - Luego abrir el PR en GitHub para revisión.
+
+---
 
 ## Posibles Extensiones Futuras
 
 - Añadir más tipos de enemigos y habilidades.
-
-- Implementar estados alterados con efectos en turnos.
 
 - Guardar y cargar partidas.
 
