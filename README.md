@@ -30,7 +30,7 @@ El juego se ejecuta en consola y busca aplicar los conceptos fundamentales de la
 ```plaintext
 dragonquest/
 │
-├── DragonQuestVIII.java           → Clase principal (main)
+├── main.java           → Clase principal (main)
 │
 ├── combate/
 │   └── Batalla.java               → Control del flujo de combate y turnos
@@ -41,12 +41,21 @@ dragonquest/
 ├── habilidades/
 │   ├── Habilidad.java             → Clase base abstracta para las habilidades
 │   ├── Curacion.java              → Habilidad de curar HP
+│   ├── CuracionGrupal.java              → Habilidad de curar HP al grupo
+│   ├── Dormir.java              → Habilidad de Dormir al enemigo
+│   ├── GolpeCritico.java              → Habilidad para que un golpe fisico tenga chance de ser un golpe critico
+│   ├── Paralisis.java              → Habilidad de paralizar al enemigo
+│   ├── RemoverEstado.java              → Habilidad para remover cualquier estado negativo 
+│   ├── Veneno.java              → Habilidad de curar HP
+│   ├── Aturdimiento.java              → Habilidad de envenenar al enemigo
 │   └── DanioMagico.java           → Habilidad ofensiva mágica
 │
 ├── items/
 │   ├── Item.java                  → Clase base abstracta para ítems
-│   ├── Pocion.java                → Restaura HP
-│   └── Eter.java                  → Restaura MP
+│   ├── InventarioGrupo.java              → Clase auxiliar simple para pares
+│   ├── PocionCuracion.java                → Restaura HP
+│   ├── Antidoto.java              → Habilidad para eliminar el estado envenenado
+│   └── PocionMagia.java                  → Restaura MP
 │
 └── personajes/
     ├── Personaje.java             → Clase base abstracta con atributos y métodos comunes
@@ -82,6 +91,56 @@ dragonquest/
 
 ---
 
+## Análisis del Diseño
+- **¿Qué pasa si dos personajes tienen la misma velocidad?**
+
+Si dos personajes tienen la misma velocidad, el sistema mantiene el orden de aparición dentro de la lista de turno.
+Esto significa que el personaje agregado primero actuará antes que el segundo.
+
+## ¿Qué sistema se usa para definir las habilidades (y que puedan tener efectos distintos)?
+
+El código usa una clase abstracta **Habilidad** que obliga a cada habilidad a implementar el método **ejecutar().**
+Gracias a eso, cada habilidad (por ejemplo **Curacion, DanioMagico,** etc.) puede tener comportamientos únicos, sin alterar la estructura base.
+
+public abstract class Habilidad {
+    protected String nombre;
+    protected int costoMP;
+    public abstract void ejecutar(Personaje usuario, List<Personaje> enemigos, List<Personaje> aliados, Scanner sc);
+}
+
+## ¿Cómo se podrían representar los distintos tipos de personajes o enemigos?
+
+**Se logra mediante herencia y especialización:**
+
+Heroe y Enemigo heredan de Personaje.
+
+Cada subclase redefine su comportamiento (tomarTurno(), atacar(), etc.).
+
+En el futuro podrían agregarse clases como:
+
+class Mago extends Heroe { ... }
+class Guerrero extends Heroe { ... }
+class JefeFinal extends Enemigo { ... }
+
+## ¿Cómo se garantiza que el código sea extensible (por ejemplo, para el Mini Proyecto 2)?
+
+**El proyecto está diseñado siguiendo principios de extensibilidad:**
+
+- Cada componente (combate, personajes, habilidades, ítems, estados) está en su propio paquete.
+
+- Las clases abstractas (Personaje, Habilidad, Item) definen contratos que pueden ser ampliados fácilmente.
+
+- Para futuras versiones se podrán agregar:
+
+- Nuevas habilidades y efectos de estado.
+
+- Tipos de personajes con comportamientos distintos.
+
+- Un sistema de niveles o experiencia.
+
+- Una interfaz gráfica (GUI) o base de datos sin alterar la lógica central.
+---
+
 ## Posibles Extensiones Futuras
 
 - Añadir más tipos de enemigos y habilidades.
@@ -89,3 +148,4 @@ dragonquest/
 - Guardar y cargar partidas.
 
 - Crear una interfaz gráfica (GUI) para el combate.
+
