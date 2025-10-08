@@ -15,7 +15,6 @@ import dragonquest.combate.Batalla;
  * - Mantener el control de flujo del programa aquí facilita reusar Batalla sin preocuparse
  *   por la apertura/cierre del flujo de entrada.
  */
-
 public class Main {
     public static void main(String[] args) {
         Scanner sc = new Scanner(System.in);
@@ -30,6 +29,8 @@ public class Main {
 
             switch (opcion) {
                 case 1 -> {
+                    // Se crea una instancia de Batalla pasando el scanner para que Batalla
+                    // pueda leer elecciones de los héroes desde consola sin crear otro Scanner.
                     Batalla batalla = new Batalla(sc);
                     batalla.iniciarCombate();
                 }
@@ -39,6 +40,7 @@ public class Main {
 
         } while (opcion != 2);
 
+        // Cerramos el scanner al final del programa (buenas prácticas).
         sc.close();
     }
 }
