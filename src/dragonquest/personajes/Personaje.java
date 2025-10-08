@@ -166,6 +166,56 @@ public abstract class Personaje {
         return estado == EstadoAlterado.NORMAL || estado == EstadoAlterado.VENENO;
     }
 
+    // ------------------------------------------------
+    // 🔹 Métodos de apoyo a ítems y habilidades
+    // ------------------------------------------------
+
+    /**
+     * 🔹 Permite eliminar un estado alterado específico.
+     * Usado por ítems como el Antídoto o habilidades curativas.
+     * 
+     * @param e Estado a eliminar (ej: VENENO, PARALIZADO, etc.)
+     * @return true si el estado fue removido exitosamente.
+     */
+    public boolean quitarEstado(EstadoAlterado e) {
+        if (estado == e) {
+            System.out.println("✨ " + nombre + " se recupera del estado " + e + ".");
+            estado = EstadoAlterado.NORMAL;
+            estadoDuracion = 0;
+            return true;
+        }
+        return false;
+    }
+
+    /**
+     * 🔹 Permite verificar si el personaje está bajo cierto estado alterado.
+     * 
+     * @param e Estado a verificar
+     * @return true si está afectado por ese estado, false si no.
+     */
+    public boolean estaEnEstado(EstadoAlterado e) {
+        return estado == e;
+    }
+
+    /**
+     * 🔹 Método para establecer el estado directamente (usado por habilidades especiales)
+     */
+    public void setEstado(EstadoAlterado nuevoEstado) {
+        this.estado = nuevoEstado;
+    }
+
+    /**
+     * 🔹 Método para establecer la duración del estado
+     */
+    public void setEstadoDuracion(int duracion) {
+        this.estadoDuracion = duracion;
+    }
+
+    // ------------------------------------------------
+    // 🔹 Métodos abstractos y utilitarios
+    // ------------------------------------------------
+
+    /** Método abstracto: se implementa en Heroe y Enemigo. */
     public abstract void tomarTurno(List<Personaje> aliados, List<Personaje> enemigos, Scanner sc);
 
     public int getVelocidad() { return velocidad; }

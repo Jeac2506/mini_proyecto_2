@@ -1,7 +1,6 @@
 package dragonquest.combate;
 
 import dragonquest.personajes.*;
-import dragonquest.habilidades.*;
 import dragonquest.items.*;
 import java.util.*;
 
