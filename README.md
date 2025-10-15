@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 # 🐉 DragonQuest – Mini Proyecto 1  
 **Materia:** Programación Orientada a Eventos  
 **Profesor:** Joshua Triana  
@@ -149,3 +150,6 @@ class JefeFinal extends Enemigo { ... }
 
 - Crear una interfaz gráfica (GUI) para el combate.
 
+=======
+# mini_proyecto_2
+>>>>>>> a1568710a5e8c7c4734d9860efc30f09e6001c99
