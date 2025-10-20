@@ -234,6 +234,10 @@ public abstract class Personaje {
         System.out.println("📚 " + nombre + " aprende: " + h.getNombre());
     }
 
+    public List<Habilidad> getHabilidades() {
+        return habilidades;
+    }
+
     // ------------------------------------------------
     // 🔹 Visualización del estado en consola
     // ------------------------------------------------

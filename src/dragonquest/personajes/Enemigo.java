@@ -150,4 +150,21 @@ public class Enemigo extends Personaje {
         // La velocidad se resetea automáticamente al final del turno
         // (necesitarías lógica adicional para manejarlo apropiadamente)
     }
+
+    private boolean dormido = false;
+
+public boolean estaDormido() {
+    return dormido;
+}
+
+public void dormir() {
+    dormido = true;
+}
+
+public void intentarDespertar() {
+    if (Math.random() < 0.5) { // 50% de probabilidad
+        dormido = false;
+    }
+}
+
 }
