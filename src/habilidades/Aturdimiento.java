@@ -1,6 +1,5 @@
 package habilidades;
 
-import personajes.Personaje;
 import estados.EstadoAlterado;
 
 /**

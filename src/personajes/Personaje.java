@@ -25,7 +25,7 @@ public abstract class Personaje {
     protected int ataque, defensa;       // atributos de combate
     protected int velocidad;             // determina el orden de turnos
     protected int hpActual, mpActual;    // valores actuales durante la batalla
-    protected List<Habilidad> habilidades; // lista de habilidades que puede usar
+    public List<Habilidad> habilidades; // lista de habilidades que puede usar
 
     // Estado alterado actual y su duración restante
     protected EstadoAlterado estado = EstadoAlterado.NORMAL;
@@ -248,6 +248,39 @@ public abstract class Personaje {
         
         System.out.printf("%s %-10s | HP: %-3d/%-3d %-22s | MP: %-3d/%-3d %-12s | Estado: %-10s\n",
                 icono, nombre, hpActual, hpMax, barraHP, mpActual, mpMax, barraMP, estadoStr);
+    }
+        // Agregar estos métodos a la clase Personaje existente:
+
+    /**
+    * Consume MP del personaje. Retorna true si tenía suficiente MP.
+    */
+    public boolean consumirMP(int cantidad) {
+        if (mpActual >= cantidad) {
+        mpActual -= cantidad;
+        return true;
+        }
+        return false;
+    }
+
+    /**
+    * Setter para HP actual (útil para efectos especiales)
+     */
+    public void setHpActual(int hp) {
+        this.hpActual = Math.max(0, Math.min(hp, hpMax));
+    }
+
+    /**
+    * Setter para MP actual (útil para efectos especiales)
+    */
+    public void setMpActual(int mp) {
+        this.mpActual = Math.max(0, Math.min(mp, mpMax));
+    }
+
+    /**
+    * Obtiene la lista de habilidades (útil para la GUI)
+    */
+    public List<Habilidad> getHabilidades() {
+        return new ArrayList<>(habilidades);
     }
 
     /** Genera una barra visual proporcional al valor actual. */

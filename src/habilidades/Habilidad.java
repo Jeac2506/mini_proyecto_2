@@ -8,11 +8,21 @@ import personajes.Personaje;
  */
 public abstract class Habilidad {
     protected String nombre;
-    protected int costoMP;
+    private int costoMP;
 
     public Habilidad(String nombre, int costoMP) {
         this.nombre = nombre;
+        this.setCostoMP(costoMP);
+    }
+
+    public int getCostoMP() {
+        return costoMP;
+        
+    }
+
+    public void setCostoMP(int costoMP) {
         this.costoMP = costoMP;
+        
     }
 
     /**
