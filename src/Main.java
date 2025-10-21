@@ -1,3 +1,8 @@
+/*No funciona Las opciones de subir y bajarle al sonido y efectos esto no tiene 
+efecto alguno en la musica y sonido del juego pero si se puede interactuar con los botones
+Tampoco tiene los 4 enemigos y debo cambiar los colores de los botones de iniciar salir y opciones para que sean mas visibles*/
+
+
 
 
 import java.util.Scanner;
