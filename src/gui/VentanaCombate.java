@@ -7,14 +7,17 @@ import estados.EstadoAlterado;
 
 import javax.sound.sampled.*;
 import javax.swing.*;
+import javax.swing.Timer;
+
 import java.awt.*;
+import java.io.PrintStream;
 import java.net.URL;
 import java.util.*;
 import java.util.List;
 
 public class VentanaCombate extends JFrame {
     // Componentes principales
-    private JPanel panelHeroes, panelEnemigos, panelAcciones;
+    private JPanel panelHeroes, panelEnemigos, panelAcciones, panelLog;
     private JTextArea logCombate;
     private JScrollPane scrollLog;
     private List<PanelPersonaje> panelesHeroes;
@@ -33,6 +36,9 @@ public class VentanaCombate extends JFrame {
     // Fondo
     private Image fondo;
     
+    // System.out original para restaurar
+    private PrintStream salidaOriginal;
+    
     public VentanaCombate() {
         setTitle("Combate - Dragon Quest VIII");
         setSize(1200, 800);
@@ -42,6 +48,9 @@ public class VentanaCombate extends JFrame {
         
         // Cargar fondo
         fondo = new ImageIcon(getClass().getResource("/imagenes/fondo_azul.png")).getImage();
+        
+        // Guardar salida original
+        salidaOriginal = System.out;
         
         // Inicializar estructuras de datos
         heroes = new ArrayList<>();
@@ -55,6 +64,9 @@ public class VentanaCombate extends JFrame {
         
         // Crear interfaz
         crearInterfaz();
+        
+        // Configurar redirección de System.out al log
+        ConsolaRedirect.configurarRedireccion(logCombate);
         
         // Reproducir música de batalla
         reproducirMusica("/sonidos/musica_menu.wav");
@@ -176,22 +188,20 @@ public class VentanaCombate extends JFrame {
         heroes.add(jessica);
         heroes.add(angelo);
         
-        // Crear enemigos
-        Enemigo dragoon = new Enemigo("Dragoon", 110, 20, 25, 10, 17, "agresivo");
-        dragoon.agregarHabilidad(new DanioMagico("Aliento de Fuego", 0, 25));
-        
+        // Crear enemigos (2 normales + 1 MINI JEFE)
         Enemigo fantasma = new Enemigo("Fantasma", 85, 40, 18, 8, 21, "estratégico");
         fantasma.agregarHabilidad(new Dormir("Pesadilla", 5));
         
-        Enemigo golem = new Enemigo("Golem de Piedra", 150, 10, 20, 18, 5, "defensivo");
-        golem.agregarHabilidad(new Aturdimiento("Puño de Roca", 0));
+        // ⭐ MINI JEFE - Enemigo más poderoso
+        MiniBoss dragonOscuro = new MiniBoss("Dragón Oscuro", 120, 40, 25, 12, 18, "agresivo");
+        dragonOscuro.agregarHabilidad(new DanioMagico("Aliento de Fuego", 0, 35));
+        dragonOscuro.agregarHabilidad(new DanioMagico("Llamarada Infernal", 15, 50));
         
         Enemigo slimeMetalico = new Enemigo("Slime Metálico", 50, 30, 15, 25, 30, "evasivo");
         slimeMetalico.agregarHabilidad(new Veneno("Baba Tóxica", 3));
         
-        enemigos.add(dragoon);
         enemigos.add(fantasma);
-        enemigos.add(golem);
+        enemigos.add(dragonOscuro); // ⭐ Mini Jefe en posición central
         enemigos.add(slimeMetalico);
         
         // Inicializar inventario
@@ -244,7 +254,7 @@ public class VentanaCombate extends JFrame {
         actualizarPaneles();
         
         if (!puedeActuar) {
-            javax.swing.Timer timer = new javax.swing.Timer(1500, e -> ejecutarTurnos(orden, indice + 1));
+            Timer timer = new Timer(1500, e -> ejecutarTurnos(orden, indice + 1));
             timer.setRepeats(false);
             timer.start();
             return;
@@ -254,7 +264,7 @@ public class VentanaCombate extends JFrame {
             mostrarMenuHeroe((Heroe) personajeActual, () -> ejecutarTurnos(orden, indice + 1));
         } else {
             ejecutarTurnoEnemigo((Enemigo) personajeActual);
-            javax.swing.Timer timer = new javax.swing.Timer(2000, e -> ejecutarTurnos(orden, indice + 1));
+            Timer timer = new Timer(2000, e -> ejecutarTurnos(orden, indice + 1));
             timer.setRepeats(false);
             timer.start();
         }
@@ -280,16 +290,24 @@ public class VentanaCombate extends JFrame {
     }
     
     private void mostrarMenuHabilidades(Heroe heroe, Runnable siguiente) {
-        if (heroe.habilidades.isEmpty()) {
-            agregarLog("No tienes habilidades.");
+        if (heroe.getHabilidades().isEmpty()) {
+            System.out.println("⚠️ No tienes habilidades.");
             mostrarMenuHeroe(heroe, siguiente);
             return;
         }
         
         panelAcciones.removeAll();
         
-        for (Habilidad h : heroe.habilidades) {
-            JButton btnHabilidad = crearBotonAccion(h.getNombre());
+        for (Habilidad h : heroe.getHabilidades()) {
+            String textoBoton = h.getNombre() + " (MP: " + h.costoMP + ")";
+            JButton btnHabilidad = crearBotonAccion(textoBoton);
+            
+            // Deshabilitar si no tiene suficiente MP
+            if (heroe.getMpActual() < h.costoMP) {
+                btnHabilidad.setEnabled(false);
+                btnHabilidad.setBackground(Color.DARK_GRAY);
+            }
+            
             btnHabilidad.addActionListener(e -> {
                 mostrarSeleccionObjetivo(heroe, "habilidad_" + h.getNombre(), siguiente);
             });
@@ -352,7 +370,7 @@ public class VentanaCombate extends JFrame {
                 panelAcciones.revalidate();
                 panelAcciones.repaint();
                 
-                javax.swing.Timer timer = new javax.swing.Timer(1500, ev -> siguiente.run());
+                Timer timer = new Timer(1500, ev -> siguiente.run());
                 timer.setRepeats(false);
                 timer.start();
             });
@@ -377,15 +395,12 @@ public class VentanaCombate extends JFrame {
                 JButton btn = crearBotonAccion(h.getNombre() + " (HP: " + h.getHpActual() + ")");
                 btn.addActionListener(ev -> {
                     boolean usado = inventario.usarItem(item, heroe, h);
-                    if (!usado) {
-                        agregarLog("No se pudo usar " + item.getNombre() + ".");
-                    }
                     actualizarPaneles();
                     panelAcciones.removeAll();
                     panelAcciones.revalidate();
                     panelAcciones.repaint();
                     
-                    javax.swing.Timer timer = new javax.swing.Timer(1500, t -> siguiente.run());
+                    Timer timer = new Timer(1500, t -> siguiente.run());
                     timer.setRepeats(false);
                     timer.start();
                 });
@@ -394,7 +409,7 @@ public class VentanaCombate extends JFrame {
             panelAcciones.revalidate();
             panelAcciones.repaint();
         });
-    
+        
         btnEnemigo.addActionListener(e -> {
             panelAcciones.removeAll();
             for (Personaje en : enemigos) {
@@ -402,15 +417,12 @@ public class VentanaCombate extends JFrame {
                 JButton btn = crearBotonAccion(en.getNombre() + " (HP: " + en.getHpActual() + ")");
                 btn.addActionListener(ev -> {
                     boolean usado = inventario.usarItem(item, heroe, en);
-                    if (!usado) {
-                        agregarLog("No se pudo usar " + item.getNombre() + ".");
-                    }
                     actualizarPaneles();
                     panelAcciones.removeAll();
                     panelAcciones.revalidate();
                     panelAcciones.repaint();
                     
-                    javax.swing.Timer timer = new javax.swing.Timer(1500, t -> siguiente.run());
+                    Timer timer = new Timer(1500, t -> siguiente.run());
                     timer.setRepeats(false);
                     timer.start();
                 });
@@ -428,26 +440,17 @@ public class VentanaCombate extends JFrame {
     
     private void ejecutarAccionHeroe(Heroe heroe, String accion, Personaje objetivo) {
         if (accion.equals("atacar")) {
-            agregarLog(heroe.getNombre() + " ataca a " + objetivo.getNombre());
+            System.out.println(heroe.getNombre() + " ataca a " + objetivo.getNombre());
             objetivo.recibirDaño(heroe.getAtaque());
         } else if (accion.startsWith("habilidad_")) {
             String nombreHabilidad = accion.substring(10);
             for (Habilidad h : heroe.getHabilidades()) {
                 if (h.getNombre().equals(nombreHabilidad)) {
-                    if (heroe.getMpActual() >= h.getCostoMP()) {
-                        agregarLog(heroe.getNombre() + " usa " + h.getNombre());
-                        // Restar MP manualmente ya que las habilidades no lo hacen
-                        int mpAnterior = heroe.getMpActual();
-                        int nuevoMp = Math.max(0, mpAnterior - h.getCostoMP());
-                        // Usar reflexión o método público para establecer MP
-                        for (int i = 0; i < h.getCostoMP(); i++) {
-                            if (heroe.getMpActual() > 0) {
-                                heroe.restaurarMP(-1); // Truco: restaurar negativo
-                            }
-                        }
+                    // Verificar y consumir MP usando el método público
+                    if (heroe.consumirMP(h.costoMP)) {
                         h.ejecutar(heroe, objetivo);
                     } else {
-                        agregarLog(heroe.getNombre() + " no tiene suficiente MP!");
+                        System.out.println("⚠️ " + heroe.getNombre() + " no tiene suficiente MP!");
                     }
                     break;
                 }
@@ -547,6 +550,8 @@ public class VentanaCombate extends JFrame {
             clipMusica.stop();
             clipMusica.close();
         }
+        // Restaurar salida original
+        ConsolaRedirect.restaurarSalida(salidaOriginal);
     }
     
     // Clase interna para representar visualmente a cada personaje

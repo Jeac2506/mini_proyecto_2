@@ -8,21 +8,11 @@ import personajes.Personaje;
  */
 public abstract class Habilidad {
     protected String nombre;
-    private int costoMP;
+    public int costoMP; // ⭐ Ahora es público para acceso directo
 
     public Habilidad(String nombre, int costoMP) {
         this.nombre = nombre;
-        this.setCostoMP(costoMP);
-    }
-
-    public int getCostoMP() {
-        return costoMP;
-        
-    }
-
-    public void setCostoMP(int costoMP) {
         this.costoMP = costoMP;
-        
     }
 
     /**
@@ -31,5 +21,14 @@ public abstract class Habilidad {
      */
     public abstract void ejecutar(Personaje usuario, Personaje objetivo);
 
-    public String getNombre() { return nombre; }
+    public String getNombre() { 
+        return nombre; 
+    }
+    
+    /**
+     * ⭐ NUEVO: Getter para el costo de MP
+     */
+    public int getCostoMP() { 
+        return costoMP; 
+    }
 }

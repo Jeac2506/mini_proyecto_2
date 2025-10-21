@@ -5,37 +5,25 @@ import estados.EstadoAlterado;
 import java.util.*;
 
 /**
- * Clase base abstracta que representa a cualquier personaje del juego.
+ * Personaje - Clase base con estado DORMIDO actualizado
  * 
- * Esta clase es el corazón del sistema de combate.
- * Todos los personajes (héroes y enemigos) heredan de ella.
- * 
- * Contiene:
- * - Atributos básicos (HP, MP, ataque, defensa, velocidad)
- * - Sistema de estados alterados (VENENO, PARALIZADO, DORMIDO, etc.)
- * - Métodos para recibir daño, curar, procesar efectos de estado
- * - Métodos auxiliares de visualización de estado (barra HP/MP)
+ * CAMBIO IMPORTANTE:
+ * - Estado DORMIDO ahora tiene 50% de probabilidad de despertar cada turno
+ * - Si no despierta, pierde el turno completamente
  */
 public abstract class Personaje {
-    // -------------------------
-    // 🔹 Atributos principales
-    // -------------------------
     protected String nombre;
-    protected int hpMax, mpMax;          // puntos máximos de vida y magia
-    protected int ataque, defensa;       // atributos de combate
-    protected int velocidad;             // determina el orden de turnos
-    protected int hpActual, mpActual;    // valores actuales durante la batalla
-    public List<Habilidad> habilidades; // lista de habilidades que puede usar
+    protected int hpMax, mpMax;
+    protected int ataque, defensa;
+    protected int velocidad;
+    protected int hpActual, mpActual;
+    protected List<Habilidad> habilidades;
 
-    // Estado alterado actual y su duración restante
     protected EstadoAlterado estado = EstadoAlterado.NORMAL;
     protected int estadoDuracion = 0;
 
     protected static final Random RAND = new Random();
 
-    // ------------------------------------------------
-    // 🔹 Constructor
-    // ------------------------------------------------
     public Personaje(String nombre, int hp, int mp, int ataque, int defensa, int velocidad) {
         this.nombre = nombre;
         this.hpMax = hp;
@@ -48,29 +36,21 @@ public abstract class Personaje {
         this.habilidades = new ArrayList<>();
     }
 
-    // ------------------------------------------------
-    // 🔹 Métodos generales de combate
-    // ------------------------------------------------
-
-    /** Devuelve true si el personaje sigue con vida. */
     public boolean estaVivo() {
         return hpActual > 0;
     }
 
-    /** Aplica daño al personaje teniendo en cuenta su defensa. */
     public void recibirDaño(int cantidad) {
-        int daño = Math.max(1, cantidad - defensa); // Mínimo 1 de daño
+        int daño = Math.max(1, cantidad - defensa);
         hpActual -= daño;
         if (hpActual < 0) hpActual = 0;
         System.out.println(nombre + " recibe " + daño + " puntos de daño. (HP: " + hpActual + "/" + hpMax + ")");
         
-        // Si muere, mostrar mensaje dramático
         if (hpActual == 0) {
             System.out.println("💀 ¡" + nombre + " ha caído en combate!");
         }
     }
 
-    /** Cura puntos de vida al personaje. */
     public void curar(int cantidad) {
         int hpAnterior = hpActual;
         hpActual = Math.min(hpMax, hpActual + cantidad);
@@ -78,7 +58,6 @@ public abstract class Personaje {
         System.out.println(nombre + " recupera " + curado + " HP. (HP: " + hpActual + "/" + hpMax + ")");
     }
 
-    /** Restaura puntos de magia al personaje. */
     public void restaurarMP(int cantidad) {
         int mpAnterior = mpActual;
         mpActual = Math.min(mpMax, mpActual + cantidad);
@@ -87,8 +66,7 @@ public abstract class Personaje {
     }
 
     /**
-     * Aplica un nuevo estado alterado si el personaje está libre de efectos.
-     * Si ya tiene un estado, no se aplica otro nuevo.
+     * Aplica un nuevo estado alterado
      */
     public void aplicarEstado(EstadoAlterado nuevo) {
         if (estado != EstadoAlterado.NORMAL) {
@@ -97,20 +75,24 @@ public abstract class Personaje {
         }
         estado = nuevo;
 
-        // Duración base según tipo de estado
+        // Duración según tipo de estado
         switch (nuevo) {
             case VENENO -> estadoDuracion = 3;
             case PARALIZADO -> estadoDuracion = 3;
-            case DORMIDO -> estadoDuracion = 2;
+            case DORMIDO -> estadoDuracion = 4; // Aumentada para el nuevo sistema
             default -> estadoDuracion = 0;
         }
         System.out.println("⚠️ " + nombre + " sufre el estado " + nuevo + " durante " + estadoDuracion + " turnos.");
     }
 
     /**
-     * Procesa los efectos del estado alterado actual antes de actuar.
+     * Procesa los efectos del estado alterado ANTES de actuar
      * 
-     * @return true si puede actuar, false si pierde el turno.
+     * CAMBIO IMPORTANTE - Estado DORMIDO:
+     * - 50% de probabilidad de despertar cada turno
+     * - Si no despierta, pierde el turno completamente
+     * 
+     * @return true si puede actuar, false si pierde el turno
      */
     public boolean procesarEstadosAntesDeActuar() {
         if (!estaVivo()) return false;
@@ -122,18 +104,21 @@ public abstract class Personaje {
                 if (hpActual < 0) hpActual = 0;
                 System.out.println("🟢 " + nombre + " sufre " + daño + " de daño por veneno. (HP: " + hpActual + ")");
             }
+            
             case DORMIDO -> {
-                if (RAND.nextInt(100) < 40) {
-                    System.out.println("😴 " + nombre + " se despierta.");
+                // ⭐ IMPLEMENTACIÓN NUEVA: 50% de probabilidad de despertar
+                if (RAND.nextInt(100) < 50) {
+                    System.out.println("😴 " + nombre + " se despierta!");
                     estado = EstadoAlterado.NORMAL;
                     estadoDuracion = 0;
-                    return true;
+                    return true; // Puede actuar
                 } else {
-                    System.out.println("💤 " + nombre + " está dormido y no puede actuar este turno.");
+                    System.out.println("💤 " + nombre + " está profundamente dormido y no puede actuar este turno.");
                     reducirDuracionEstado();
-                    return false;
+                    return false; // Pierde el turno
                 }
             }
+            
             case PARALIZADO -> {
                 if (RAND.nextInt(100) < 30) {
                     System.out.println("⚡ " + nombre + " está paralizado y no puede moverse este turno.");
@@ -143,13 +128,17 @@ public abstract class Personaje {
                     System.out.println("💪 " + nombre + " logra moverse a pesar de la parálisis!");
                 }
             }
+            
             default -> {}
         }
+        
         reducirDuracionEstado();
         return true;
     }
 
-    /** Reduce la duración del estado activo y lo elimina si ya terminó. */
+    /**
+     * Reduce la duración del estado activo
+     */
     private void reducirDuracionEstado() {
         if (estado != EstadoAlterado.NORMAL) {
             estadoDuracion--;
@@ -161,21 +150,12 @@ public abstract class Personaje {
         }
     }
 
-    /** Devuelve true si puede realizar acciones en este turno. */
     public boolean puedeActuar() {
         return estado == EstadoAlterado.NORMAL || estado == EstadoAlterado.VENENO;
     }
 
-    // ------------------------------------------------
-    // 🔹 Métodos de apoyo a ítems y habilidades
-    // ------------------------------------------------
-
     /**
-     * 🔹 Permite eliminar un estado alterado específico.
-     * Usado por ítems como el Antídoto o habilidades curativas.
-     * 
-     * @param e Estado a eliminar (ej: VENENO, PARALIZADO, etc.)
-     * @return true si el estado fue removido exitosamente.
+     * Permite eliminar un estado alterado específico
      */
     public boolean quitarEstado(EstadoAlterado e) {
         if (estado == e) {
@@ -188,36 +168,56 @@ public abstract class Personaje {
     }
 
     /**
-     * 🔹 Permite verificar si el personaje está bajo cierto estado alterado.
-     * 
-     * @param e Estado a verificar
-     * @return true si está afectado por ese estado, false si no.
+     * Verifica si el personaje está bajo cierto estado alterado
      */
     public boolean estaEnEstado(EstadoAlterado e) {
         return estado == e;
     }
 
-    /**
-     * 🔹 Método para establecer el estado directamente (usado por habilidades especiales)
-     */
     public void setEstado(EstadoAlterado nuevoEstado) {
         this.estado = nuevoEstado;
     }
 
-    /**
-     * 🔹 Método para establecer la duración del estado
-     */
     public void setEstadoDuracion(int duracion) {
         this.estadoDuracion = duracion;
     }
 
-    // ------------------------------------------------
-    // 🔹 Métodos abstractos y utilitarios
-    // ------------------------------------------------
+    /**
+     * ⭐ NUEVO: Consume MP del personaje
+     */
+    public boolean consumirMP(int cantidad) {
+        if (mpActual >= cantidad) {
+            mpActual -= cantidad;
+            return true;
+        }
+        return false;
+    }
 
-    /** Método abstracto: se implementa en Heroe y Enemigo. */
+    /**
+     * ⭐ NUEVO: Setter para HP actual
+     */
+    public void setHpActual(int hp) {
+        this.hpActual = Math.max(0, Math.min(hp, hpMax));
+    }
+
+    /**
+     * ⭐ NUEVO: Setter para MP actual
+     */
+    public void setMpActual(int mp) {
+        this.mpActual = Math.max(0, Math.min(mp, mpMax));
+    }
+
+    /**
+     * ⭐ NUEVO: Obtiene la lista de habilidades
+     */
+    public List<Habilidad> getHabilidades() {
+        return new ArrayList<>(habilidades);
+    }
+
+    // Método abstracto
     public abstract void tomarTurno(List<Personaje> aliados, List<Personaje> enemigos, Scanner sc);
 
+    // Getters
     public int getVelocidad() { return velocidad; }
     public String getNombre() { return nombre; }
     public int getAtaque() { return ataque; }
@@ -234,56 +234,23 @@ public abstract class Personaje {
         System.out.println("📚 " + nombre + " aprende: " + h.getNombre());
     }
 
-    // ------------------------------------------------
-    // 🔹 Visualización del estado en consola
-    // ------------------------------------------------
-
-    /** Muestra barras de HP y MP junto al estado actual del personaje. */
+    /**
+     * Muestra barras de HP y MP junto al estado actual
+     */
     public void mostrarEstado() {
         String barraHP = generarBarra(hpActual, hpMax, 20, "♥");
         String barraMP = generarBarra(mpActual, mpMax, 10, "★");
         
         String estadoStr = estado == EstadoAlterado.NORMAL ? "Normal" : estado.toString();
-        String icono = this instanceof Heroe ? "⚔️" : "👾";
+        String icono = this instanceof Heroe ? "⚔️" : (this instanceof MiniBoss ? "👹" : "👾");
         
         System.out.printf("%s %-10s | HP: %-3d/%-3d %-22s | MP: %-3d/%-3d %-12s | Estado: %-10s\n",
                 icono, nombre, hpActual, hpMax, barraHP, mpActual, mpMax, barraMP, estadoStr);
     }
-        // Agregar estos métodos a la clase Personaje existente:
 
     /**
-    * Consume MP del personaje. Retorna true si tenía suficiente MP.
-    */
-    public boolean consumirMP(int cantidad) {
-        if (mpActual >= cantidad) {
-        mpActual -= cantidad;
-        return true;
-        }
-        return false;
-    }
-
-    /**
-    * Setter para HP actual (útil para efectos especiales)
+     * Genera una barra visual proporcional al valor actual
      */
-    public void setHpActual(int hp) {
-        this.hpActual = Math.max(0, Math.min(hp, hpMax));
-    }
-
-    /**
-    * Setter para MP actual (útil para efectos especiales)
-    */
-    public void setMpActual(int mp) {
-        this.mpActual = Math.max(0, Math.min(mp, mpMax));
-    }
-
-    /**
-    * Obtiene la lista de habilidades (útil para la GUI)
-    */
-    public List<Habilidad> getHabilidades() {
-        return new ArrayList<>(habilidades);
-    }
-
-    /** Genera una barra visual proporcional al valor actual. */
     private String generarBarra(int actual, int max, int largo, String simbolo) {
         int relleno = 0;
         if (max > 0) relleno = (int) ((double) actual / max * largo);
@@ -294,14 +261,13 @@ public abstract class Personaje {
         }
         barra.append("]");
         
-        // Colorear según el porcentaje
         double porcentaje = max > 0 ? (double) actual / max : 0;
         if (porcentaje > 0.5) {
-            return barra.toString(); // Verde (normal)
+            return barra.toString(); // Verde
         } else if (porcentaje > 0.25) {
-            return barra.toString(); // Amarillo (precaución)
+            return barra.toString(); // Amarillo
         } else {
-            return barra.toString(); // Rojo (crítico)
+            return barra.toString(); // Rojo
         }
     }
 }
