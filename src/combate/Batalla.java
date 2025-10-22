@@ -66,7 +66,7 @@ public class Batalla {
         heroes.add(angelo);
 
         // ========================================
-        // ENEMIGOS (2 NORMALES + 1 MINI JEFE)
+        // ENEMIGOS (3 NORMALES + 1 MINI JEFE)
         // ========================================
         
         // Enemigo normal 1
@@ -77,6 +77,11 @@ public class Batalla {
         // Enemigo normal 2
         Enemigo slimeMetalico = new Enemigo("Slime Metálico", 50, 30, 15, 25, 30, "evasivo");
         slimeMetalico.agregarHabilidad(new Veneno("Baba Tóxica", 3));
+        
+        // Enemigo normal 3 - Nuevo enemigo
+        Enemigo orcoGuerrero = new Enemigo("Orco Guerrero", 95, 35, 22, 12, 16, "agresivo");
+        orcoGuerrero.agregarHabilidad(new GolpeCritico("Hachazo Salvaje", 8));
+        orcoGuerrero.agregarHabilidad(new Aturdimiento("Golpe Atronador", 6));
 
         // ⭐ MINI JEFE (más fuerte que los enemigos normales)
         miniBoss = new MiniBoss("Dragón Oscuro", 120, 40, 25, 12, 18, "agresivo");
@@ -84,10 +89,11 @@ public class Batalla {
         miniBoss.agregarHabilidad(new DanioMagico("Llamarada Infernal", 15, 50));
         miniBoss.agregarHabilidad(new Aturdimiento("Rugido Aterrador", 10));
 
-        // Agregar enemigos en orden (mini jefe en el medio para más drama)
+        // Agregar enemigos en orden (mini jefe al final para más drama)
         enemigos.add(fantasma);
-        enemigos.add(miniBoss); // ⭐ El jefe principal
         enemigos.add(slimeMetalico);
+        enemigos.add(orcoGuerrero);
+        enemigos.add(miniBoss); // ⭐ El jefe principal
 
         // ========================================
         // INVENTARIO COMPARTIDO

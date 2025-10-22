@@ -75,6 +75,8 @@ public class VentanaOpciones extends JDialog {
             int valor = sliderMusica.getValue();
             lblVolumenMusica.setText("Volumen Música: " + valor + "%");
             config.setVolumenMusica(valor);
+            // Aplicar el cambio inmediatamente
+            aplicarCambiosVolumen();
         });
         
         panelVolMusica.add(lblVolumenMusica, BorderLayout.NORTH);
@@ -95,6 +97,8 @@ public class VentanaOpciones extends JDialog {
             int valor = sliderEfectos.getValue();
             lblVolumenEfectos.setText("Volumen Efectos: " + valor + "%");
             config.setVolumenEfectos(valor);
+            // Aplicar el cambio inmediatamente
+            aplicarCambiosVolumen();
         });
         
         panelVolEfectos.add(lblVolumenEfectos, BorderLayout.NORTH);
@@ -217,12 +221,36 @@ public class VentanaOpciones extends JDialog {
      */
     private JButton crearBoton(String texto) {
         JButton boton = new JButton(texto);
-        boton.setBackground(new Color(30, 30, 80));
-        boton.setForeground(Color.WHITE);
+        
+        // Forzar UI básica para que respete colores
+        boton.setUI(new javax.swing.plaf.basic.BasicButtonUI());
+        
+        // Colores contrastantes
+        Color colorFondo = new Color(30, 60, 130);
+        Color colorTexto = Color.WHITE;
+        Color colorBorde = new Color(255, 215, 0);
+        
+        boton.setOpaque(true);
+        boton.setContentAreaFilled(true);
+        boton.setBackground(colorFondo);
+        boton.setForeground(colorTexto);
         boton.setFont(new Font("Monospaced", Font.BOLD, 14));
         boton.setFocusPainted(false);
-        boton.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+        boton.setBorder(BorderFactory.createLineBorder(colorBorde, 2));
         boton.setPreferredSize(new Dimension(150, 40));
+        
+        // Efecto hover
+        boton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                boton.setBackground(new Color(45, 90, 170));
+                boton.setBorder(BorderFactory.createLineBorder(Color.YELLOW, 3));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                boton.setBackground(colorFondo);
+                boton.setBorder(BorderFactory.createLineBorder(colorBorde, 2));
+            }
+        });
+        
         return boton;
     }
     
@@ -237,5 +265,21 @@ public class VentanaOpciones extends JDialog {
         
         lblVolumenMusica.setText("Volumen Música: " + config.getVolumenMusica() + "%");
         lblVolumenEfectos.setText("Volumen Efectos: " + config.getVolumenEfectos() + "%");
+    }
+    
+    /**
+     * Aplica los cambios de volumen inmediatamente
+     */
+    private void aplicarCambiosVolumen() {
+        // Obtener la ventana principal para ajustar el volumen
+        JFrame ventanaPrincipal = (JFrame) getParent();
+        if (ventanaPrincipal instanceof VentanaPrincipal) {
+            ((VentanaPrincipal) ventanaPrincipal).ajustarVolumenMusica();
+        }
+        
+        // También podríamos ajustar efectos de sonido aquí si los hubiera
+        System.out.println("🔊 Configuración de audio actualizada:");
+        System.out.println("   Música: " + config.getVolumenMusica() + "%");
+        System.out.println("   Efectos: " + config.getVolumenEfectos() + "%");
     }
 }

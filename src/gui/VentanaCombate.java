@@ -22,6 +22,7 @@ public class VentanaCombate extends JFrame {
     private JScrollPane scrollLog;
     private List<PanelPersonaje> panelesHeroes;
     private List<PanelPersonaje> panelesEnemigos;
+    private JLabel lblTurno; // Label del turno para actualizarlo
     
     // Lógica de combate
     private List<Personaje> heroes;
@@ -39,18 +40,24 @@ public class VentanaCombate extends JFrame {
     // System.out original para restaurar
     private PrintStream salidaOriginal;
     
+    // Scanner para enemigos (evitar problemas con System.in)
+    private Scanner scannerEnemigos;
+    
     public VentanaCombate() {
         setTitle("Combate - Dragon Quest VIII");
-        setSize(1200, 800);
+        setSize(1000, 700);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setResizable(false);
+        setResizable(true);
         
         // Cargar fondo
         fondo = new ImageIcon(getClass().getResource("/imagenes/fondo_azul.png")).getImage();
         
         // Guardar salida original
         salidaOriginal = System.out;
+        
+        // Crear scanner para enemigos
+        scannerEnemigos = new Scanner("dummy"); // Scanner dummy para enemigos
         
         // Inicializar estructuras de datos
         heroes = new ArrayList<>();
@@ -129,7 +136,7 @@ public class VentanaCombate extends JFrame {
         panelCombate.add(panelEnemigos, BorderLayout.EAST);
         
         // Panel central: información de turno
-        JLabel lblTurno = new JLabel("TURNO " + turno, SwingConstants.CENTER);
+        lblTurno = new JLabel("TURNO " + turno, SwingConstants.CENTER);
         lblTurno.setFont(new Font("Monospaced", Font.BOLD, 24));
         lblTurno.setForeground(Color.YELLOW);
         panelCombate.add(lblTurno, BorderLayout.CENTER);
@@ -139,14 +146,15 @@ public class VentanaCombate extends JFrame {
         panelInferior.setOpaque(false);
         panelInferior.setBorder(BorderFactory.createEmptyBorder(10, 20, 20, 20));
         
-        // Log de combate
-        logCombate = new JTextArea(8, 50);
+        // Log de combate (más compacto)
+        logCombate = new JTextArea(6, 40);
         logCombate.setEditable(false);
         logCombate.setBackground(new Color(20, 20, 40));
         logCombate.setForeground(Color.WHITE);
-        logCombate.setFont(new Font("Monospaced", Font.PLAIN, 12));
+        logCombate.setFont(new Font("Monospaced", Font.PLAIN, 11));
         scrollLog = new JScrollPane(logCombate);
         scrollLog.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+        scrollLog.setPreferredSize(new Dimension(400, 120));
         
         // Panel de acciones
         panelAcciones = new JPanel(new FlowLayout(FlowLayout.CENTER, 10, 10));
@@ -166,20 +174,20 @@ public class VentanaCombate extends JFrame {
     }
     
     private void inicializarCombate() {
-        // Crear héroes
-        Heroe heroe = new Heroe("Héroe", 100, 50, 20, 10, 15);
+        // Crear héroes (con velocidades altas para actuar primero)
+        Heroe heroe = new Heroe("Héroe", 100, 50, 20, 10, 25);
         heroe.agregarHabilidad(new DanioMagico("Bola de Fuego", 10, 30));
         heroe.agregarHabilidad(new Curacion("Curar", 8, 25));
         
-        Heroe yangus = new Heroe("Yangus", 120, 30, 25, 15, 10);
+        Heroe yangus = new Heroe("Yangus", 120, 30, 25, 15, 22);
         yangus.agregarHabilidad(new GolpeCritico("Hachazo Brutal", 5));
         yangus.agregarHabilidad(new Aturdimiento("Golpe Aturdidor", 8));
         
-        Heroe jessica = new Heroe("Jessica", 80, 70, 18, 8, 20);
+        Heroe jessica = new Heroe("Jessica", 80, 70, 18, 8, 28);
         jessica.agregarHabilidad(new DanioMagico("Rayo", 12, 35));
         jessica.agregarHabilidad(new Veneno("Toxina", 8));
         
-        Heroe angelo = new Heroe("Angelo", 90, 60, 22, 12, 18);
+        Heroe angelo = new Heroe("Angelo", 90, 60, 22, 12, 24);
         angelo.agregarHabilidad(new Curacion("Bendición", 10, 30));
         angelo.agregarHabilidad(new Paralisis("Toque Sagrado", 10));
         
@@ -188,21 +196,27 @@ public class VentanaCombate extends JFrame {
         heroes.add(jessica);
         heroes.add(angelo);
         
-        // Crear enemigos (2 normales + 1 MINI JEFE)
-        Enemigo fantasma = new Enemigo("Fantasma", 85, 40, 18, 8, 21, "estratégico");
+        // Crear enemigos (3 normales + 1 MINI JEFE) - con velocidades menores
+        Enemigo fantasma = new Enemigo("Fantasma", 85, 40, 18, 8, 15, "estratégico");
         fantasma.agregarHabilidad(new Dormir("Pesadilla", 5));
         
         // ⭐ MINI JEFE - Enemigo más poderoso
-        MiniBoss dragonOscuro = new MiniBoss("Dragón Oscuro", 120, 40, 25, 12, 18, "agresivo");
+        MiniBoss dragonOscuro = new MiniBoss("Dragón Oscuro", 120, 40, 25, 12, 12, "agresivo");
         dragonOscuro.agregarHabilidad(new DanioMagico("Aliento de Fuego", 0, 35));
         dragonOscuro.agregarHabilidad(new DanioMagico("Llamarada Infernal", 15, 50));
         
-        Enemigo slimeMetalico = new Enemigo("Slime Metálico", 50, 30, 15, 25, 30, "evasivo");
+        Enemigo slimeMetalico = new Enemigo("Slime Metálico", 50, 30, 15, 25, 18, "evasivo");
         slimeMetalico.agregarHabilidad(new Veneno("Baba Tóxica", 3));
+
+        // Nuevo enemigo adicional
+        Enemigo orcoGuerrero = new Enemigo("Orco Guerrero", 95, 35, 22, 12, 14, "agresivo");
+        orcoGuerrero.agregarHabilidad(new GolpeCritico("Hachazo Salvaje", 8));
+        orcoGuerrero.agregarHabilidad(new Aturdimiento("Golpe Atronador", 6));
         
         enemigos.add(fantasma);
-        enemigos.add(dragonOscuro); // ⭐ Mini Jefe en posición central
         enemigos.add(slimeMetalico);
+        enemigos.add(orcoGuerrero);
+        enemigos.add(dragonOscuro); // ⭐ Mini Jefe al final
         
         // Inicializar inventario
         inventario.agregarItem(new PocionCuracion("Poción pequeña", 30), 5);
@@ -217,12 +231,14 @@ public class VentanaCombate extends JFrame {
             return;
         }
         
-        // Ordenar por velocidad
+        // Ordenar por velocidad (alternado: héroe, enemigo, héroe, enemigo...)
         List<Personaje> orden = new ArrayList<>();
         orden.addAll(heroes);
         orden.addAll(enemigos);
         orden.sort((a, b) -> {
+            // Primero por velocidad (mayor velocidad primero)
             if (b.getVelocidad() != a.getVelocidad()) return b.getVelocidad() - a.getVelocidad();
+            // En caso de empate, alternar: héroe, enemigo, héroe, enemigo...
             if (a instanceof Heroe && b instanceof Enemigo) return -1;
             if (a instanceof Enemigo && b instanceof Heroe) return 1;
             return 0;
@@ -232,19 +248,31 @@ public class VentanaCombate extends JFrame {
     }
     
     private void ejecutarTurnos(List<Personaje> orden, int indice) {
+        // Verificar fin del combate antes de continuar
+        if (verificarFinCombate()) {
+            return;
+        }
+        
         if (indice >= orden.size()) {
+            // Fin de ronda, incrementar turno
             turno++;
             actualizarPaneles();
+            actualizarLabelTurno();
             agregarLog("\n═══════════════════════════════════════════════════════════════");
             agregarLog("TURNO " + turno);
             agregarLog("═══════════════════════════════════════════════════════════════\n");
-            SwingUtilities.invokeLater(this::iniciarSiguienteTurno);
+            
+            // Iniciar nueva ronda después de un breve delay
+            Timer timer = new Timer(1000, e -> iniciarSiguienteTurno());
+            timer.setRepeats(false);
+            timer.start();
             return;
         }
         
         personajeActual = orden.get(indice);
         
         if (!personajeActual.estaVivo()) {
+            // Saltar personajes muertos
             ejecutarTurnos(orden, indice + 1);
             return;
         }
@@ -254,6 +282,7 @@ public class VentanaCombate extends JFrame {
         actualizarPaneles();
         
         if (!puedeActuar) {
+            // Personaje no puede actuar, continuar con el siguiente
             Timer timer = new Timer(1500, e -> ejecutarTurnos(orden, indice + 1));
             timer.setRepeats(false);
             timer.start();
@@ -460,7 +489,20 @@ public class VentanaCombate extends JFrame {
     
     private void ejecutarTurnoEnemigo(Enemigo enemigo) {
         agregarLog("\n▸ Turno de " + enemigo.getNombre() + " (Enemigo)");
-        enemigo.tomarTurno(enemigos, heroes, new Scanner(System.in));
+        try {
+            enemigo.tomarTurno(enemigos, heroes, scannerEnemigos);
+        } catch (Exception e) {
+            // Si hay error, hacer ataque básico
+            agregarLog("⚠️ Error en turno de enemigo, atacando básicamente...");
+            if (!heroes.isEmpty()) {
+                Personaje objetivo = heroes.get(0);
+                if (objetivo.estaVivo()) {
+                    int daño = enemigo.getAtaque();
+                    objetivo.recibirDaño(daño);
+                    agregarLog(enemigo.getNombre() + " ataca a " + objetivo.getNombre() + " por " + daño + " de daño.");
+                }
+            }
+        }
         actualizarPaneles();
     }
     
@@ -515,6 +557,12 @@ public class VentanaCombate extends JFrame {
         }
     }
     
+    private void actualizarLabelTurno() {
+        if (lblTurno != null) {
+            lblTurno.setText("TURNO " + turno);
+        }
+    }
+    
     private void agregarLog(String texto) {
         logCombate.append(texto + "\n");
         logCombate.setCaretPosition(logCombate.getDocument().getLength());
@@ -522,12 +570,36 @@ public class VentanaCombate extends JFrame {
     
     private JButton crearBotonAccion(String texto) {
         JButton boton = new JButton(texto);
-        boton.setBackground(new Color(30, 30, 80));
-        boton.setForeground(Color.WHITE);
+        
+        // Forzar UI básica para que respete colores
+        boton.setUI(new javax.swing.plaf.basic.BasicButtonUI());
+        
+        // Colores contrastantes
+        Color colorFondo = new Color(30, 60, 130);
+        Color colorTexto = Color.WHITE;
+        Color colorBorde = new Color(255, 215, 0);
+        
+        boton.setOpaque(true);
+        boton.setContentAreaFilled(true);
+        boton.setBackground(colorFondo);
+        boton.setForeground(colorTexto);
         boton.setFont(new Font("Monospaced", Font.BOLD, 14));
         boton.setFocusPainted(false);
-        boton.setBorder(BorderFactory.createLineBorder(Color.WHITE, 2));
+        boton.setBorder(BorderFactory.createLineBorder(colorBorde, 2));
         boton.setPreferredSize(new Dimension(180, 40));
+        
+        // Efecto hover
+        boton.addMouseListener(new java.awt.event.MouseAdapter() {
+            public void mouseEntered(java.awt.event.MouseEvent evt) {
+                boton.setBackground(new Color(45, 90, 170));
+                boton.setBorder(BorderFactory.createLineBorder(Color.YELLOW, 3));
+            }
+            public void mouseExited(java.awt.event.MouseEvent evt) {
+                boton.setBackground(colorFondo);
+                boton.setBorder(BorderFactory.createLineBorder(colorBorde, 2));
+            }
+        });
+        
         return boton;
     }
     
@@ -538,6 +610,10 @@ public class VentanaCombate extends JFrame {
             AudioInputStream audioInput = AudioSystem.getAudioInputStream(url);
             clipMusica = AudioSystem.getClip();
             clipMusica.open(audioInput);
+            
+            // Aplicar volumen según configuración
+            ajustarVolumenMusica();
+            
             clipMusica.loop(Clip.LOOP_CONTINUOUSLY);
             clipMusica.start();
         } catch (Exception e) {
@@ -545,10 +621,34 @@ public class VentanaCombate extends JFrame {
         }
     }
     
+    /**
+     * Ajusta el volumen de la música según la configuración actual
+     */
+    public void ajustarVolumenMusica() {
+        if (clipMusica != null && clipMusica.isOpen()) {
+            try {
+                FloatControl volumen = (FloatControl) clipMusica.getControl(FloatControl.Type.MASTER_GAIN);
+                // Obtener configuración actual
+                config.ConfiguracionJuego configuracion = config.ConfiguracionJuego.obtenerInstancia();
+                float db = (float) (Math.log(configuracion.getVolumenMusica() / 100.0) / Math.log(10.0) * 20.0);
+                // Limitar el rango de decibeles
+                db = Math.max(-80.0f, Math.min(6.0f, db));
+                volumen.setValue(db);
+                System.out.println("🔊 Volumen de música ajustado a: " + configuracion.getVolumenMusica() + "%");
+            } catch (IllegalArgumentException e) {
+                System.err.println("⚠️ No se pudo ajustar el volumen de música: " + e.getMessage());
+            }
+        }
+    }
+    
     private void detenerMusica() {
         if (clipMusica != null && clipMusica.isRunning()) {
             clipMusica.stop();
             clipMusica.close();
+        }
+        // Limpiar scanner
+        if (scannerEnemigos != null) {
+            scannerEnemigos.close();
         }
         // Restaurar salida original
         ConsolaRedirect.restaurarSalida(salidaOriginal);
@@ -577,22 +677,26 @@ public class VentanaCombate extends JFrame {
             barraHP = new JProgressBar(0, p.getHpMax());
             barraHP.setValue(p.getHpActual());
             barraHP.setStringPainted(true);
+            barraHP.setString(p.getHpActual() + "/" + p.getHpMax());
             barraHP.setForeground(Color.GREEN);
             barraHP.setBackground(Color.DARK_GRAY);
+            barraHP.setPreferredSize(new Dimension(200, 20));
             
             lblHP = new JLabel("HP: " + p.getHpActual() + "/" + p.getHpMax());
             lblHP.setForeground(Color.WHITE);
-            lblHP.setFont(new Font("Monospaced", Font.PLAIN, 11));
+            lblHP.setFont(new Font("Monospaced", Font.PLAIN, 10));
             
             barraMP = new JProgressBar(0, p.getMpMax());
             barraMP.setValue(p.getMpActual());
             barraMP.setStringPainted(true);
+            barraMP.setString(p.getMpActual() + "/" + p.getMpMax());
             barraMP.setForeground(Color.CYAN);
             barraMP.setBackground(Color.DARK_GRAY);
+            barraMP.setPreferredSize(new Dimension(200, 20));
             
             lblMP = new JLabel("MP: " + p.getMpActual() + "/" + p.getMpMax());
             lblMP.setForeground(Color.WHITE);
-            lblMP.setFont(new Font("Monospaced", Font.PLAIN, 11));
+            lblMP.setFont(new Font("Monospaced", Font.PLAIN, 10));
             
             String estadoTexto = p.getEstado() == EstadoAlterado.NORMAL ? "Normal" : p.getEstado().toString();
             lblEstado = new JLabel("Estado: " + estadoTexto);
@@ -608,9 +712,11 @@ public class VentanaCombate extends JFrame {
         
         public void actualizar() {
             barraHP.setValue(personaje.getHpActual());
+            barraHP.setString(personaje.getHpActual() + "/" + personaje.getHpMax());
             lblHP.setText("HP: " + personaje.getHpActual() + "/" + personaje.getHpMax());
             
             barraMP.setValue(personaje.getMpActual());
+            barraMP.setString(personaje.getMpActual() + "/" + personaje.getMpMax());
             lblMP.setText("MP: " + personaje.getMpActual() + "/" + personaje.getMpMax());
             
             String estadoTexto = personaje.getEstado() == EstadoAlterado.NORMAL ? "Normal" : personaje.getEstado().toString();

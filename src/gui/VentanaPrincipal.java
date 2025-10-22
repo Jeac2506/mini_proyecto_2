@@ -19,11 +19,10 @@ public class VentanaPrincipal extends JFrame {
         config = ConfiguracionJuego.obtenerInstancia();
         
         setTitle("Dragon Quest VIII - Simulador de Combate");
-        Dimension dim = config.getDimensionVentana();
-        setSize(dim.width, dim.height);
+        setSize(800, 600);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
-        setResizable(false);
+        setResizable(true);
 
         // Cargar fondo
         try {
@@ -171,25 +170,45 @@ public class VentanaPrincipal extends JFrame {
      */
     private JButton crearBoton(String texto, Font fuente) {
         JButton boton = new JButton(texto);
-        boton.setBackground(config.getColorPrimario());
-        boton.setForeground(config.getColorTexto());
+
+        // Forzar UI básica para que respete colores personalizados en Windows LAF
+        boton.setUI(new javax.swing.plaf.basic.BasicButtonUI());
+
+        // Colores contrastantes para buena legibilidad
+        Color colorFondo = new Color(30, 60, 130);      // Azul oscuro
+        Color colorHover = new Color(45, 90, 170);      // Azul más claro para hover
+        Color colorTexto = Color.WHITE;
+        Color colorBorde = new Color(255, 215, 0);      // Dorado
+
+        boton.setOpaque(true);
+        boton.setContentAreaFilled(true);
+        boton.setBackground(colorFondo);
+        boton.setForeground(colorTexto);
         boton.setFont(fuente);
         boton.setFocusPainted(false);
         boton.setBorder(BorderFactory.createCompoundBorder(
-            BorderFactory.createLineBorder(Color.WHITE, 2),
-            BorderFactory.createEmptyBorder(10, 20, 10, 20)
+            BorderFactory.createLineBorder(colorBorde, 3),
+            BorderFactory.createEmptyBorder(12, 25, 12, 25)
         ));
-        
+
         // Efecto hover
         boton.addMouseListener(new java.awt.event.MouseAdapter() {
             public void mouseEntered(java.awt.event.MouseEvent evt) {
-                boton.setBackground(config.getColorSecundario());
+                boton.setBackground(colorHover);
+                boton.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(Color.YELLOW, 4),
+                    BorderFactory.createEmptyBorder(12, 25, 12, 25)
+                ));
             }
             public void mouseExited(java.awt.event.MouseEvent evt) {
-                boton.setBackground(config.getColorPrimario());
+                boton.setBackground(colorFondo);
+                boton.setBorder(BorderFactory.createCompoundBorder(
+                    BorderFactory.createLineBorder(colorBorde, 3),
+                    BorderFactory.createEmptyBorder(12, 25, 12, 25)
+                ));
             }
         });
-        
+
         return boton;
     }
 
@@ -209,9 +228,7 @@ public class VentanaPrincipal extends JFrame {
             clipMusica.open(audioInput);
             
             // Ajustar volumen según configuración
-            FloatControl volumen = (FloatControl) clipMusica.getControl(FloatControl.Type.MASTER_GAIN);
-            float db = (float) (Math.log(config.getVolumenMusica() / 100.0) / Math.log(10.0) * 20.0);
-            volumen.setValue(db);
+            ajustarVolumenMusica();
             
             clipMusica.loop(Clip.LOOP_CONTINUOUSLY);
             clipMusica.start();
@@ -220,6 +237,25 @@ public class VentanaPrincipal extends JFrame {
             System.err.println("⚠️ Error al reproducir música: " + e.getMessage());
         } catch (IllegalArgumentException e) {
             System.err.println("⚠️ Control de volumen no disponible");
+        }
+    }
+    
+    /**
+     * Ajusta el volumen de la música según la configuración actual
+     */
+    public void ajustarVolumenMusica() {
+        if (clipMusica != null && clipMusica.isOpen()) {
+            try {
+                FloatControl volumen = (FloatControl) clipMusica.getControl(FloatControl.Type.MASTER_GAIN);
+                // Convertir porcentaje a decibeles
+                float db = (float) (Math.log(config.getVolumenMusica() / 100.0) / Math.log(10.0) * 20.0);
+                // Limitar el rango de decibeles
+                db = Math.max(-80.0f, Math.min(6.0f, db));
+                volumen.setValue(db);
+                System.out.println("🔊 Volumen de música ajustado a: " + config.getVolumenMusica() + "%");
+            } catch (IllegalArgumentException e) {
+                System.err.println("⚠️ No se pudo ajustar el volumen de música: " + e.getMessage());
+            }
         }
     }
 
