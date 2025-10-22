@@ -1,15 +1,14 @@
 package dragonquest.gui;
 
 import dragonquest.combate.BatallaGUI;
+import dragonquest.personajes.*;
 import javax.swing.*;
 import java.awt.*;
-import java.awt.event.ActionEvent;
-import java.awt.event.ActionListener;
 
 /**
  * VentanaPrincipal - Interfaz gráfica del juego Dragon Quest VIII.
- * Se conecta directamente con BatallaGUI para ejecutar las acciones
- * reales del héroe (Atacar, Usar Habilidad, Usar Ítem).
+ * Controla el flujo de turnos de manera alternada (Héroe -> Enemigo -> ...),
+ * mostrando en pantalla de quién es el turno actual.
  */
 public class VentanaPrincipal extends JFrame {
 
@@ -21,6 +20,7 @@ public class VentanaPrincipal extends JFrame {
     public VentanaPrincipal(BatallaGUI batalla) {
         this.batalla = batalla;
         inicializarComponentes();
+        mostrarTurnoActual();
     }
 
     private void inicializarComponentes() {
@@ -74,41 +74,88 @@ public class VentanaPrincipal extends JFrame {
         panelBotones.add(btnItem);
         add(panelBotones, BorderLayout.SOUTH);
 
-        configurarEventos();
-        actualizarPaneles(); // mostrar héroes y enemigos al iniciar
+        actualizarPaneles();
+
+        // ====== EVENTOS DE BOTONES ======
+        btnAtacar.addActionListener(e -> ejecutarTurno("atacar"));
+        btnHabilidad.addActionListener(e -> ejecutarTurno("habilidad"));
+        btnItem.addActionListener(e -> ejecutarTurno("item"));
     }
 
-    private void configurarEventos() {
-        btnAtacar.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String resultado = batalla.jugadorAtaca();
-                areaTexto.append(resultado + "\n");
-                actualizarPaneles();
-            }
-        });
+    /** Muestra el personaje en turno actual */
+    private void mostrarTurnoActual() {
+        Personaje actual = batalla.getPersonajeEnTurno();
+        if (actual == null) return;
 
-        btnHabilidad.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String resultado = batalla.jugadorUsaHabilidad();
-                areaTexto.append(resultado + "\n");
-                actualizarPaneles();
-            }
-        });
+        areaTexto.append("----------------------------------------------------\n");
+        areaTexto.append("Turno de " + actual.getNombre() +
+                " (HP: " + actual.getHpActual() + ")\n");
 
-        btnItem.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                String resultado = batalla.jugadorUsaItem();
-                areaTexto.append(resultado + "\n");
+        // Si es héroe → permitir acción manual
+        if (actual instanceof Heroe) {
+            activarBotones(true);
+            areaTexto.append("Es tu turno. Elige una acción.\n");
+        } 
+        // Si es enemigo → realiza su turno y pasa al siguiente personaje
+        else {
+            activarBotones(false);
+            // Esperamos un momento antes de ejecutar para que se vea fluido
+            new javax.swing.Timer(1000, e -> {
+                String log = batalla.ejecutarTurnoJugador("enemigo");
+                areaTexto.append(log + "\n");
                 actualizarPaneles();
-            }
-        });
+                verificarFinDeBatalla();
+
+                // Avanzar al siguiente turno (héroe o enemigo)
+                mostrarTurnoActual();
+            }).setRepeats(false); // Evita que se repita infinitamente
+        }
     }
 
+
+    /** Ejecuta la acción del jugador en su turno */
+    private void ejecutarTurno(String tipoAccion) {
+        if (batalla.isBatallaTerminada()) {
+            JOptionPane.showMessageDialog(this, "⚔️ La batalla ya ha terminado.", "Fin del combate", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        String resultado = batalla.ejecutarTurnoJugador(tipoAccion);
+        areaTexto.append(resultado + "\n\n");
+        actualizarPaneles();
+
+        verificarFinDeBatalla();
+        mostrarTurnoActual();
+    }
+
+    /** Verifica si alguien ganó o perdió */
+    private void verificarFinDeBatalla() {
+        if (todosMuertos(batalla.getEnemigos())) {
+            JOptionPane.showMessageDialog(this, "🎉 ¡Victoria! Los héroes han ganado el combate.", "Fin del combate", JOptionPane.INFORMATION_MESSAGE);
+            activarBotones(false);
+        } else if (todosMuertos(batalla.getHeroes())) {
+            JOptionPane.showMessageDialog(this, "💀 Derrota... Los héroes han sido vencidos.", "Fin del combate", JOptionPane.ERROR_MESSAGE);
+            activarBotones(false);
+        }
+    }
+
+    /** Activa o desactiva los botones según turno */
+    private void activarBotones(boolean activo) {
+        btnAtacar.setEnabled(activo);
+        btnHabilidad.setEnabled(activo);
+        btnItem.setEnabled(activo);
+    }
+
+    /** Comprueba si todos los personajes de una lista están muertos */
+    private boolean todosMuertos(java.util.List<Personaje> lista) {
+        for (Personaje p : lista) {
+            if (p.estaVivo()) return false;
+        }
+        return true;
+    }
+
+    /** Refresca las barras de HP */
     private void actualizarPaneles() {
-        // Actualizar paneles de héroes y enemigos
         panelHeroes.removeAll();
         panelEnemigos.removeAll();
 
