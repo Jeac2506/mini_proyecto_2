@@ -117,7 +117,7 @@ public class Enemigo extends Personaje {
         }
     }
 
-    private void atacar(List<Personaje> enemigos) {
+    public void atacar(List<Personaje> enemigos) {
         List<Personaje> vivos = new ArrayList<>();
         for (Personaje p : enemigos) if (p.estaVivo()) vivos.add(p);
         if (vivos.isEmpty()) return;
