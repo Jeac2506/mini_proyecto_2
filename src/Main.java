@@ -1,6 +1,9 @@
 /*No funciona Las opciones de subir y bajarle al sonido y efectos esto no tiene 
 efecto alguno en la musica y sonido del juego pero si se puede interactuar con los botones
-Tampoco tiene los 4 enemigos y debo cambiar los colores de los botones de iniciar salir y opciones para que sean mas visibles*/
+Tampoco tiene los 4 enemigos y debo cambiar los colores de los botones de iniciar salir y opciones para que sean mas visibles
+Falta que me deje combatir ya que al inicio cuando preisono iniciar combate no me sale ningun error sin embargo no se muestran las opciones para atacar 
+o usar habilidad y usar item y por ende tampoco el resto de opciones nevcesarias para que se desarrolle el combate correctamente
+*/
 
 
 

@@ -195,4 +195,3 @@ public class ConfiguracionJuego {
     }
 }
 
-// No fucniona Las opciones de subir y bajarle al sonido y efectos esto no tiene efecto alguno en la musica y sonido del juego pero si se puede interactuar con los botones//

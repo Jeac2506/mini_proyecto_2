@@ -13,7 +13,7 @@ import java.util.*;
  * - Mayor velocidad que enemigos normales
  * - Resistencia a estados alterados (50% de probabilidad de resistir)
  */
-public class MiniBoss extends Personaje {
+public class MiniBoss extends Enemigo {
     private String comportamiento;
     private boolean defendiendo = false;
     private boolean modoFurioso = false; // Se activa con menos de 50% HP
@@ -32,7 +32,8 @@ public class MiniBoss extends Personaje {
               mp, 
               (int)(ataque * MULTIPLICADOR_ATAQUE), 
               (int)(defensa * MULTIPLICADOR_DEFENSA), 
-              velocidad + 5); // +5 velocidad extra
+              velocidad + 5,// +5 velocidad extra
+              comportamiento);
         
         this.comportamiento = comportamiento;
         
@@ -104,12 +105,8 @@ public class MiniBoss extends Personaje {
             case "defensivo" -> comportamientoDefensivoJefe(enemigos, rand);
             case "estratégico" -> comportamientoEstrategicoJefe(enemigos, rand);
             case "evasivo" -> comportamientoEvasivoJefe(enemigos, rand);
-            default -> atacar(enemigos);
+            default -> ataquePoderoso(enemigos);
         }
-    }
-
-    private Object atacar(List<Personaje> enemigos) {
-        throw new UnsupportedOperationException("Unimplemented method 'atacar'");
     }
 
     private void comportamientoAgresivoJefe(List<Personaje> enemigos, Random rand) {
