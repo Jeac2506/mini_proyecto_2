@@ -1,5 +1,5 @@
 <<<<<<< HEAD
-# 🐉 DragonQuest – Mini Proyecto 1  
+# 🐉 DragonQuest – Mini Proyecto 2  
 **Materia:** Programación Orientada a Eventos  
 **Profesor:** Joshua Triana  
 **Universidad del Valle**
@@ -23,7 +23,7 @@ El juego se ejecuta en consola y busca aplicar los conceptos fundamentales de la
 - Clases abstractas e interfaces  
 - Encapsulamiento  
 - Organización modular por paquetes
-
+- Interfaz gráfica con **Swing**
 ---
 
 ## Estructura del Proyecto
@@ -36,8 +36,21 @@ dragonquest/
 ├── combate/
 │   └── Batalla.java               → Control del flujo de combate y turnos
 │
+├── config/                            → Manejo de configuración general del juego
+│   ├── ConfiguracionJuego.java        → Lee y aplica valores desde config.properties
+│   └── ConfiguracionJuegoManager.java → Control centralizado de opciones (volumen, dificultad, etc.)
+│
 ├── estados/
 │   └── EstadoAlterado.java        → Enum con estados (normal, paralizado, dormido, etc.)
+│
+├── gui/                               → Contiene toda la interfaz gráfica (Java Swing)
+│   ├── VentanaPrincipal.java          → Ventana inicial del juego (menú principal con opciones)
+│   ├── VentanaCombate.java            → Ventana principal de combate con paneles de héroes y enemigos
+│   ├── PanelHeroe.java                → Muestra la información de cada héroe (nombre, HP, MP, estados)
+│   ├── PanelEnemigo.java              → Muestra la información de cada enemigo
+│   ├── VentanaHabilidades.java        → Permite seleccionar y usar habilidades disponibles
+│   ├── VentanaInventario.java         → Permite seleccionar y usar ítems del inventario
+│   ├── PanelMensajes.java             → Panel auxiliar que muestra eventos del combate (ataques, curaciones, etc.)
 │
 ├── habilidades/
 │   ├── Habilidad.java             → Clase base abstracta para las habilidades
@@ -51,12 +64,22 @@ dragonquest/
 │   ├── Aturdimiento.java              → Habilidad de envenenar al enemigo
 │   └── DanioMagico.java           → Habilidad ofensiva mágica
 │
+├── imagenes/
+│   └── fondo_azul.png
+│
 ├── items/
 │   ├── Item.java                  → Clase base abstracta para ítems
 │   ├── InventarioGrupo.java              → Clase auxiliar simple para pares
 │   ├── PocionCuracion.java                → Restaura HP
 │   ├── Antidoto.java              → Habilidad para eliminar el estado envenenado
 │   └── PocionMagia.java                  → Restaura MP
+│
+├── sonidos/
+│   ├── heal.wav               
+│   ├── hit.wav
+│   ├── musica_batalla.wav
+│   ├── musica_menu.wav
+│   └── status.wav
 │
 └── personajes/
     ├── Personaje.java             → Clase base abstracta con atributos y métodos comunes
@@ -70,7 +93,7 @@ dragonquest/
 
 **Clonar el repositorio:**
 
-- git clone https://github.com/Juliank100/Mini_Proyecto_1.git cd Mini_Proyecto_1
+- git clone https://github.com/Jeac2506/mini_proyecto_2 cd mini_Proyecto_2
 
 
 **Crear una nueva rama:**
@@ -151,5 +174,3 @@ class JefeFinal extends Enemigo { ... }
 - Crear una interfaz gráfica (GUI) para el combate.
 
 =======
-# mini_proyecto_2
->>>>>>> a1568710a5e8c7c4734d9860efc30f09e6001c99
